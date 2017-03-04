@@ -216,7 +216,9 @@ if(MSVC)
   target_compile_options(protoc PRIVATE /wd4244 /wd4267 /wd4018 /wd4355 /wd4800 /wd4251 /wd4996 /wd4146 /wd4305)
 endif()
 
-set_target_properties(protoc PROPERTIES PATH ${CMAKE_CURRENT_BINARY_DIR}/protoc)
+set_target_properties(protobuf PROPERTIES INSTALL_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/src/google)
+set_target_properties(protobuf PROPERTIES INSTALL_INCLUDE_PATTERN "*.h")
+set_target_properties(protobuf PROPERTIES INSTALL_LIB_PATH ${CMAKE_CURRENT_BINARY_DIR}/libprotobuf.a)
 
 if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
