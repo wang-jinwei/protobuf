@@ -198,6 +198,7 @@ set(protoc_files
 
 add_library(protobuf STATIC ${libprotobuf_files} ${libprotobuf_lite_files})
 target_include_directories(protobuf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set_target_properties(protobuf PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_executable(protoc ${protoc_files} ${libprotoc_files})
 target_include_directories(protoc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
