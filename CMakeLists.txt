@@ -1,6 +1,12 @@
 project(protobuf)
 cmake_minimum_required(VERSION 3.0)
 
+if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+  set(TOP_PROJECT ON)
+else()
+  set(TOP_PROJECT OFF)
+endif()
+
 set(protobuf_source_dir ${CMAKE_CURRENT_SOURCE_DIR})
 set(libprotobuf_lite_files
   ${protobuf_source_dir}/src/google/protobuf/arena.cc
@@ -221,7 +227,7 @@ set_target_properties(protobuf PROPERTIES INSTALL_INCLUDE_PATH ${CMAKE_CURRENT_S
 set_target_properties(protobuf PROPERTIES INSTALL_INCLUDE_PATTERN "*.h")
 set_target_properties(protobuf PROPERTIES INSTALL_LIB_PATH ${CMAKE_CURRENT_BINARY_DIR}/libprotobuf.a)
 
-if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+if(TOP_PROJECT)
   set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
   install(TARGETS protobuf DESTINATION lib)
   install(TARGETS protoc DESTINATION bin)
