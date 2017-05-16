@@ -186,17 +186,25 @@ set(libprotoc_files
   ${protobuf_source_dir}/src/google/protobuf/compiler/zip_writer.cc
 )
 
-set(js_well_known_types_sources,
+set(js_well_known_types_sources
   ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/any.js
   ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/struct.js
   ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/timestamp.js
 )
-add_executable(js_embed ${protobuf_source_dir}/src/google/protobuf/compiler/js/embed.cc)
-add_custom_command(
-  OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
-  DEPENDS js_embed ${js_well_known_types_sources}
-  COMMAND js_embed ${js_well_known_types_sources} > ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
-)
+if(DEFINED PROTOBUF_JS_EMBED_PATH)
+  add_custom_command(
+    OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+    DEPENDS ${PROTOBUF_JS_EMBED_PATH} ${js_well_known_types_sources}
+    COMMAND ${PROTOBUF_JS_EMBED_PATH} ${js_well_known_types_sources} > ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+  )
+else()
+  add_executable(js_embed ${protobuf_source_dir}/src/google/protobuf/compiler/js/embed.cc)
+  add_custom_command(
+    OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+    DEPENDS js_embed ${js_well_known_types_sources}
+    COMMAND js_embed ${js_well_known_types_sources} > ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+  )
+endif()
 
 set(protoc_files
   ${protobuf_source_dir}/src/google/protobuf/compiler/main.cc
@@ -204,6 +212,11 @@ set(protoc_files
 
 add_library(protobuf STATIC ${libprotobuf_files} ${libprotobuf_lite_files})
 target_include_directories(protobuf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+include(CheckCXXSymbolExists)
+CHECK_CXX_SYMBOL_EXISTS("__ANDROID__" "" ANDROID_DEFINED)
+if(ANDROID_DEFINED)
+  target_link_libraries(protobuf PUBLIC log)
+endif()
 set_target_properties(protobuf PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_executable(protoc ${protoc_files} ${libprotoc_files})
