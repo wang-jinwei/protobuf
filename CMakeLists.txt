@@ -191,20 +191,25 @@ set(js_well_known_types_sources
   ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/struct.js
   ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types/timestamp.js
 )
-if(DEFINED PROTOBUF_JS_EMBED_PATH)
+if(CMAKE_CROSSCOMPILING)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/host_compile)
   add_custom_command(
-    OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
-    DEPENDS ${PROTOBUF_JS_EMBED_PATH} ${js_well_known_types_sources}
-    COMMAND ${PROTOBUF_JS_EMBED_PATH} ${js_well_known_types_sources} > ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/host_compile/js_embed
+    COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/host_compile --target js_embed
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/host_compile
   )
+  set(PROTOBUF_JS_EMBED_PATH ${CMAKE_CURRENT_BINARY_DIR}/host_compile/js_embed)
 else()
   add_executable(js_embed ${protobuf_source_dir}/src/google/protobuf/compiler/js/embed.cc)
-  add_custom_command(
-    OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
-    DEPENDS js_embed ${js_well_known_types_sources}
-    COMMAND js_embed ${js_well_known_types_sources} > ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
-  )
+  set(PROTOBUF_JS_EMBED_PATH js_embed)
 endif()
+add_custom_command(
+  OUTPUT ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+  DEPENDS ${PROTOBUF_JS_EMBED_PATH} ${js_well_known_types_sources}
+  COMMAND ${PROTOBUF_JS_EMBED_PATH} ${js_well_known_types_sources} >
+    ${protobuf_source_dir}/src/google/protobuf/compiler/js/well_known_types_embed.cc
+)
 
 set(protoc_files
   ${protobuf_source_dir}/src/google/protobuf/compiler/main.cc
